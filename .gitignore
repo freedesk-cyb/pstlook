@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+dist/
+*.spec
+data/*.db
+data/*.db-*
+data/*.bak
+data/*.log
+data/attachments/*
+!data/attachments/.gitkeep
