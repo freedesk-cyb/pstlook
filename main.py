@@ -2,9 +2,16 @@ from __future__ import annotations
 
 import logging
 import sys
+from pathlib import Path
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
+
+
+def _ruta_recurso(relativa: str) -> Path:
+    base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+    return base / relativa
 
 
 def _configurar_logging() -> None:
@@ -31,8 +38,12 @@ def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName("PST Reader")
     app.setApplicationDisplayName("PST Reader")
+    app.setApplicationVersion("1.0.0")
     app.setOrganizationName("PSTReader")
     app.setStyle("Fusion")
+    icono = _ruta_recurso("assets/pstlook.ico")
+    if icono.exists():
+        app.setWindowIcon(QIcon(str(icono)))
 
     _configurar_logging()
 

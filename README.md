@@ -16,6 +16,7 @@ JavaScript deshabilitado y con las peticiones de red bloqueadas.
   - `libpff-python` (recomendado), que se importa como `pypff`, o
   - `readpst` del proyecto libpst como alternativa
 - Para desarrollo: `PySide6`, `libpff-python` (opcional) y `pyinstaller`
+- Para generar el instalador: Inno Setup 6
 
 Importante: el paquete de PyPI llamado `pypff` no son los bindings de libpff.
 El paquete correcto es `libpff-python`; el módulo Python resultante sí se llama
@@ -136,29 +137,59 @@ triggers.
   carpeta `data` y los respaldos. El respaldo previo a la migración también
   contiene datos personales.
 
-## Empaquetar con PyInstaller
+## Generar la aplicación de escritorio
 
-Desde `pst_reader_app`:
+Desde `pst_reader_app`, con el entorno virtual activo:
 
 ```powershell
-pyinstaller --noconfirm --clean --onefile --windowed --name PSTReader --collect-all PySide6.QtWebEngineCore --collect-all PySide6.QtWebEngineWidgets main.py
+.\build.ps1
 ```
 
-Si `libpff-python` está instalado, PyInstaller detecta el módulo `pypff`. Si el
-ejecutable falla al importarlo, agrega:
+El script usa `PSTReader.spec` y genera `dist\PSTReader.exe`. Es un ejecutable
+autocontenido: incluye Python, Qt, Qt WebEngine y, si está instalado, el módulo
+`pypff`. No necesita Python instalado en el equipo de destino.
 
-```text
---collect-all pypff
+El icono y los metadatos de versión están en `assets\pstlook.ico` y
+`packaging\version_info.txt`.
+
+La aplicación empaquetada guarda sus datos en
+`%LOCALAPPDATA%\PSTReader\data`, no dentro de `dist`. Para distribuirla
+manualmente, copia solo `PSTReader.exe`; no incluyas la carpeta `data` del
+proyecto.
+
+Si se desea usar el backend alternativo, copia `readpst.exe` junto a
+`PSTReader.exe` o define `READPST_PATH`. `readpst` puede necesitar DLLs
+adicionales de libpst.
+
+Notas:
+
+- El primer arranque de un ejecutable `--onefile` con Qt WebEngine puede tardar
+  mientras Windows descomprime los archivos temporales.
+- El ejecutable no está firmado digitalmente. Windows SmartScreen puede mostrar
+  una advertencia; se puede omitir con "Más información" > "Ejecutar de todos
+  modos".
+- Para un arranque más rápido y menos falsos positivos de antivirus, se puede
+  cambiar el empaquetado a `--onedir` en el archivo `.spec`.
+
+### Instalador para Windows
+
+El instalador requiere Inno Setup 6. Una vez instalado:
+
+```powershell
+.\build_installer.ps1
 ```
 
-Si se desea distribuir `readpst.exe` junto al ejecutable, usa
-`--add-binary "C:\ruta\a\readpst.exe;."` y define `READPST_PATH` o coloca
-`readpst.exe` junto a `PSTReader.exe`. `readpst` puede necesitar DLLs adicionales
-de libpst.
+El resultado es `dist\PSTReader-1.0.0-Setup.exe`. El instalador:
 
-El resultado queda en `dist\PSTReader.exe`. En `--onefile`, Qt WebEngine y
-PyInstaller pueden tardar en arrancar la primera vez; si aparecen problemas de
-empaquetado, `--onedir` suele ser más robusto para Qt WebEngine.
+- Se instala por usuario en `%LOCALAPPDATA%\Programs\PST Reader`, sin requerir
+  permisos de administrador.
+- Crea accesos directos en el menú Inicio y, opcionalmente, en el escritorio.
+- Incluye un desinstalador.
+- No incluye datos personales. Al desinstalar, conserva la base y los adjuntos
+  en `%LOCALAPPDATA%\PSTReader\data`.
+
+El script `installer.iss` contiene la configuración de Inno Setup y
+`build_installer.ps1` localiza automáticamente el compilador.
 
 ## Limitaciones del MVP
 
