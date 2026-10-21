@@ -7,6 +7,11 @@ PySide6 y QWebEngineView para mostrar el HTML de los mensajes.
 No necesita servidor ni conexión a internet. El contenido HTML se renderiza con
 JavaScript deshabilitado y con las peticiones de red bloqueadas.
 
+## Descarga
+
+El instalador para Windows x64 y la versión portable están disponibles en
+[GitHub Releases](https://github.com/freedesk-cyb/pstlook/releases/latest).
+
 ## Requisitos
 
 - Python 3.11 o superior
